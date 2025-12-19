@@ -20,7 +20,8 @@
     <None Include=".gitignore" />
     <None Include="assets\sounds\test.flac" />
     <None Include="assets\shaders\fragment_shader.glsl" />
-    <None Include="assets\shaders\vertex_shader.glsl" />
+    <None Include="assets\shaders\fragment.glsl" />
+    <None Include="assets\shaders\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

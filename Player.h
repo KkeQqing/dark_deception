@@ -1,36 +1,41 @@
-// src/Player.h
-#ifndef PLAYER_H
-#define PLAYER_H
-
+#pragma once
 #include <glm/glm.hpp>
-#include "InputHandler.h"
-#include "AudioSystem.h"
-#include <cmath>
 
-class Game; // Forward declaration
-
+// 玩家类
 class Player {
 public:
-    glm::vec2 position;
-    float radius = 8.0f;
-    float speed = 150.0f;
-    float baseSpeed = 150.0f;
-    float acceleratedSpeed = 300.0f;
+	glm::vec2 position; // 玩家位置
+	float radius = 8.0f; // 玩家半径
+	float speed = 150.0f; // 玩家速度
+	bool isAccelerating = false; // 是否在加速
+	float accelTimer = 0.0f; // 加速计时器
+	float cooldownE = 0.0f; // 技能E冷却时间
+	float cooldownQ = 0.0f; // 技能Q冷却时间
 
-    bool isAccelerating = false;
-    float accelDuration = 3.0f;
-    float accelTimer = 0.0f;
-    float cooldownE = 0.0f;
-    float cooldownEDuration = 15.0f;
+	Player(float x, float y) : position(x, y) {}// 构造函数
 
-    float cooldownQ = 0.0f;
-    float cooldownQDuration = 20.0f;
+	// 更新玩家状态
+    void Update(float deltaTime) {
+        if (accelTimer > 0) {
+            accelTimer -= deltaTime;
+            speed = 300.0f;
+        }
+        else {
+            speed = 150.0f;
+            isAccelerating = false;
+        }
 
-    Player(float x, float y);
-    void update(float deltaTime, const class MazeGenerator& maze, AudioSystem& audio);
-    void draw(class Renderer& renderer);
-    bool checkCollision(const glm::vec2& otherPos, float otherRadius) const;
-    void reset(float x, float y);
+        if (cooldownE > 0) cooldownE -= deltaTime;
+        if (cooldownQ > 0) cooldownQ -= deltaTime;
+    }
+
+	// 检测玩家是否在指定单元格内
+    bool IsInCell(int cx, int cy, float cellSize) const {
+        float left = cx * cellSize;
+        float right = (cx + 1) * cellSize;
+        float top = cy * cellSize;
+        float bottom = (cy + 1) * cellSize;
+        return (position.x + radius > left && position.x - radius < right &&
+            position.y + radius > top && position.y - radius < bottom);
+    }
 };
-
-#endif

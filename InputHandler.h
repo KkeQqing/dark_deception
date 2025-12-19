@@ -1,22 +1,25 @@
-// src/InputHandler.h
-#ifndef INPUTHANDLER_H
-#define INPUTHANDLER_H
-
+#pragma once
 #include <GLFW/glfw3.h>
-#include <array>
+#include "Player.h"
 
+// 输入处理类
 class InputHandler {
 public:
-    static std::array<bool, 512> keys;
-    static double mouseX, mouseY;
+	// 处理输入
+    static void ProcessInput(GLFWwindow* window, Player& player, float deltaTime) {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
 
-    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-    static void cursorPosCallback(GLFWwindow* window, double xpos, double ypos);
-    static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+        float velocity = player.speed * deltaTime;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            player.position.y -= velocity;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            player.position.y += velocity;
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            player.position.x -= velocity;
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            player.position.x += velocity;
 
-    static bool isKeyPressed(int key);
-    static bool isMouseButtonPressed(int button);
-    static void update(); // 可用于每帧重置某些状态
+        // Skills would be handled here or in the main loop based on key events
+    }
 };
-
-#endif

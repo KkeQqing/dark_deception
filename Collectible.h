@@ -1,19 +1,12 @@
-// src/Collectible.h
-#ifndef COLLECTIBLE_H
-#define COLLECTIBLE_H
-
+#pragma once
 #include <glm/glm.hpp>
 
+// 收集物类
 class Collectible {
 public:
-    glm::vec2 position;
-    float size = 10.0f;
-    bool collected = false;
+	glm::vec2 position;// 位置 
+	float size = 10.0f; // 大小
+	bool collected = false; // 是否已被收集
 
-    Collectible(float x, float y);
-    void draw(class Renderer& renderer);
-    bool checkCollection(const class Player& player);
-    void reset(float x, float y);
+    Collectible(float x, float y) : position(x, y) {}
 };
-
-#endif

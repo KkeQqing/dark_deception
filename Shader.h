@@ -1,31 +1,28 @@
-// src/Shader.h
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <glad/glad.h>
+#include <glad/glad.h> // 必须在 glfw3.h 之前
+#include <GLFW/glfw3.h>
+
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <glm/glm.hpp>
 
-class Shader {
+// 着色器类，用于编译和链接顶点着色器和片段着色器
+class Shader
+{
 public:
-    unsigned int ID;
+	unsigned int ID; // 着色器程序ID
 
-    Shader(const char* vertexPath, const char* fragmentPath);
+	Shader(const char* vertexPath, const char* fragmentPath); // 构造函数，读取并编译着色器
 
-    void use();
+	void use(); // 激活着色器程序
 
-    void setBool(const std::string& name, bool value) const;
-    void setInt(const std::string& name, int value) const;
-    void setFloat(const std::string& name, float value) const;
-    void setVec2(const std::string& name, const glm::vec2& value) const;
-    void setVec3(const std::string& name, const glm::vec3& value) const;
-    void setMat4(const std::string& name, const glm::mat4& mat) const;
+	void setMat4(const std::string& name, const glm::mat4& mat) const; // 设置4x4矩阵统一变量
 
 private:
-    void checkCompileErrors(unsigned int shader, std::string type);
+	void checkCompileErrors(unsigned int shader, std::string type); // 检查编译和链接错误
 };
-
 #endif

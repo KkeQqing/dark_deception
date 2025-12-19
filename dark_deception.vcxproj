@@ -129,8 +129,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\shaders\fragment.glsl" />
     <None Include="assets\shaders\fragment_shader.glsl" />
-    <None Include="assets\shaders\vertex_shader.glsl" />
+    <None Include="assets\shaders\vertex.glsl" />
     <None Include="assets\sounds\test.flac" />
     <None Include="packages.config" />
     <None Include="README.md" />
