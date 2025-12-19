@@ -1,5 +1,6 @@
 #pragma once
 // 注意：你需要将 miniaudio.c 添加到你的项目源文件中进行编译
+#define GLM_ENABLE_EXPERIMENTAL
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 #include <map>

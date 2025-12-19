@@ -1,5 +1,7 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #pragma once
 #include <glm/glm.hpp>
+#include "MazeGenerator.h" // 需要访问迷宫结构
 
 // 玩家类
 class Player {
@@ -12,30 +14,14 @@ public:
 	float cooldownE = 0.0f; // 技能E冷却时间
 	float cooldownQ = 0.0f; // 技能Q冷却时间
 
-	Player(float x, float y) : position(x, y) {}// 构造函数
+	Player(float x, float y); // 构造函数声明
 
 	// 更新玩家状态
-    void Update(float deltaTime) {
-        if (accelTimer > 0) {
-            accelTimer -= deltaTime;
-            speed = 300.0f;
-        }
-        else {
-            speed = 150.0f;
-            isAccelerating = false;
-        }
-
-        if (cooldownE > 0) cooldownE -= deltaTime;
-        if (cooldownQ > 0) cooldownQ -= deltaTime;
-    }
+	void Update(float deltaTime);
 
 	// 检测玩家是否在指定单元格内
-    bool IsInCell(int cx, int cy, float cellSize) const {
-        float left = cx * cellSize;
-        float right = (cx + 1) * cellSize;
-        float top = cy * cellSize;
-        float bottom = (cy + 1) * cellSize;
-        return (position.x + radius > left && position.x - radius < right &&
-            position.y + radius > top && position.y - radius < bottom);
-    }
+	bool IsInCell(int cx, int cy, float cellSize) const;
+
+	// --- 新增: 精确墙体碰撞检测 ---
+	bool CheckWallCollision(const MazeGenerator& mazeGen, float newX, float newY, float cellSize) const;
 };

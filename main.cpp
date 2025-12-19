@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glad/glad.h> // 必须在 glfw3.h 之前
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -8,11 +9,10 @@
 
 #include "Shader.h"
 #include "MazeGenerator.h"
-#include "Player.h"
-#include "Monster.h"
+#include "Player.h" // 包含 Player 头文件
+#include "Monster.h" // 包含 Monster 头文件
 #include "Collectible.h"
 #include "Renderer.h"
-#include "InputHandler.h"
 #include "AudioSystem.h"
 
 // 全局变量用于回调
@@ -23,6 +23,40 @@ AudioSystem audioSystem; // 全局音频系统实例
 void framebuffer_size_callback(GLFWwindow* window, int width, int height); // 窗口大小回调
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode); // 键盘回调
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods); // 鼠标按钮回调
+
+// --- 新增: 重置游戏函数 ---
+void ResetGame(MazeGenerator& mazeGen, Player& player, std::vector<Monster>& monsters, std::vector<Collectible>& collectibles, int& score, const int MAZE_WIDTH, const int MAZE_HEIGHT, const float CELL_SIZE) {
+    // 重新生成迷宫
+    mazeGen.Generate();
+
+    // 重置玩家位置
+    player.position = glm::vec2(CELL_SIZE / 2, CELL_SIZE / 2);
+    player.speed = 150.0f; // 重置速度
+    player.isAccelerating = false;
+    player.accelTimer = 0.0f;
+    player.cooldownE = 0.0f;
+    player.cooldownQ = 0.0f;
+
+    // 重新放置怪物
+    monsters.clear();
+    monsters.emplace_back(5 * CELL_SIZE + CELL_SIZE / 2, 5 * CELL_SIZE + CELL_SIZE / 2);
+    monsters.emplace_back(10 * CELL_SIZE + CELL_SIZE / 2, 10 * CELL_SIZE + CELL_SIZE / 2);
+    monsters.emplace_back(15 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
+    // 注意：Monster 构造函数会自动设置 homePosition
+
+    // 重新放置收集品
+    collectibles.clear();
+    for (int i = 0; i < 5; ++i) {
+        int x = rand() % MAZE_WIDTH;
+        int y = rand() % MAZE_HEIGHT;
+        collectibles.emplace_back(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2);
+    }
+
+    score = collectibles.size(); // 重置分数
+
+    // 重置警报
+    alertTriggered = false;
+}
 
 int main()
 {
@@ -87,6 +121,11 @@ int main()
     float lastFrame = 0.0f;
     int score = collectibles.size();
 
+    // --- 新增: 胜利状态管理 ---
+    bool gameWon = false;
+    float victoryTimer = 0.0f;
+    const float victoryDisplayTime = 3.0f; // 胜利消息显示时间
+
     // 游戏主循环
     while (!glfwWindowShouldClose(window))
     {
@@ -94,11 +133,24 @@ int main()
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // 处理输入
-        InputHandler::ProcessInput(window, player, deltaTime);
+        // --- 处理输入 (使用改进的碰撞检测) ---
+        // 移动逻辑
+        float velocity = player.speed * deltaTime;
+        glm::vec2 newPosition = player.position; // 临时存储新位置
 
-        // --- 更新逻辑 ---
-        player.Update(deltaTime);
+        if (keys[GLFW_KEY_W])
+            newPosition.y -= velocity;
+        if (keys[GLFW_KEY_S])
+            newPosition.y += velocity;
+        if (keys[GLFW_KEY_A])
+            newPosition.x -= velocity;
+        if (keys[GLFW_KEY_D])
+            newPosition.x += velocity;
+
+        // 检查碰撞并更新位置
+        if (!player.CheckWallCollision(mazeGen, newPosition.x, newPosition.y, CELL_SIZE)) {
+            player.position = newPosition;
+        }
 
         // 技能处理 (在主循环中检查按键状态)
         if (keys[GLFW_KEY_E] && player.cooldownE <= 0) {
@@ -114,21 +166,24 @@ int main()
             // 解冻逻辑可以放在 Monster::Update 里
         }
 
+        // --- 更新逻辑 ---
+        player.Update(deltaTime);
+
         // 更新怪物
         alertTriggered = false;
         for (auto& monster : monsters) {
-            monster.Update(deltaTime, player);
+            monster.Update(deltaTime, player); // 现在 Monster::Update 接收 Player 引用
             if (!alertTriggered && monster.visible && glm::distance(monster.position, player.position) < monster.detectionRange) {
                 alertTriggered = true;
                 audioSystem.PlaySound("alert"); // 播放一次即可
             }
-            // 简单解冻逻辑
+            // 简单解冻逻辑 (放在主循环而不是 Monster::Update 中是为了同步)
             if (monster.frozen && player.cooldownQ <= (20.0f - 2.0f + 0.1f)) { // 假设冻结2秒
                 monster.frozen = false;
             }
         }
 
-        // 碰撞检测
+        // 碰撞检测 (收集品)
         for (auto& item : collectibles) {
             if (!item.collected) {
                 float dx = player.position.x - item.position.x;
@@ -139,6 +194,24 @@ int main()
                     score--;
                     audioSystem.PlaySound("collect");
                 }
+            }
+        }
+
+        // --- 胜利条件检查 ---
+        if (score <= 0 && !gameWon) {
+            gameWon = true;
+            victoryTimer = 0.0f; // 开始计时
+            std::cout << "Victory! Game will restart shortly...\n"; // 控制台输出
+        }
+
+        // --- 胜利状态处理 ---
+        if (gameWon) {
+            victoryTimer += deltaTime;
+            if (victoryTimer >= victoryDisplayTime) {
+                // 重启游戏
+                ResetGame(mazeGen, player, monsters, collectibles, score, MAZE_WIDTH, MAZE_HEIGHT, CELL_SIZE);
+                gameWon = false; // 重置胜利标志
+                victoryTimer = 0.0f;
             }
         }
 
