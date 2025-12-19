@@ -26,25 +26,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 // --- 新增: 重置游戏函数 ---
 void ResetGame(MazeGenerator& mazeGen, Player& player, std::vector<Monster>& monsters, std::vector<Collectible>& collectibles, int& score, const int MAZE_WIDTH, const int MAZE_HEIGHT, const float CELL_SIZE) {
-    // 重新生成迷宫
     mazeGen.Generate();
 
-    // 重置玩家位置
-    player.position = glm::vec2(CELL_SIZE / 2, CELL_SIZE / 2);
-    player.speed = 150.0f; // 重置速度
+    // --- 修改 Player 初始化 ---
+    player = Player(0, 0, CELL_SIZE); // 从 (0,0) 单元格开始
+
+    player.speed = 150.0f;
     player.isAccelerating = false;
     player.accelTimer = 0.0f;
     player.cooldownE = 0.0f;
     player.cooldownQ = 0.0f;
 
-    // 重新放置怪物
     monsters.clear();
     monsters.emplace_back(5 * CELL_SIZE + CELL_SIZE / 2, 5 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(10 * CELL_SIZE + CELL_SIZE / 2, 10 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(15 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
-    // 注意：Monster 构造函数会自动设置 homePosition
 
-    // 重新放置收集品
     collectibles.clear();
     for (int i = 0; i < 5; ++i) {
         int x = rand() % MAZE_WIDTH;
@@ -52,9 +49,7 @@ void ResetGame(MazeGenerator& mazeGen, Player& player, std::vector<Monster>& mon
         collectibles.emplace_back(x * CELL_SIZE + CELL_SIZE / 2, y * CELL_SIZE + CELL_SIZE / 2);
     }
 
-    score = collectibles.size(); // 重置分数
-
-    // 重置警报
+    score = collectibles.size();
     alertTriggered = false;
 }
 
@@ -100,7 +95,7 @@ int main()
     mazeGen.Generate();
 
     // 简单放置玩家在起点
-    Player player(CELL_SIZE / 2, CELL_SIZE / 2);
+    Player player(0, 0, CELL_SIZE);
 
     // 放置怪物
     std::vector<Monster> monsters;
@@ -133,29 +128,34 @@ int main()
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // --- 处理输入 (使用改进的碰撞检测) ---
-        // 移动逻辑
-        float velocity = player.speed * deltaTime;
-        glm::vec2 newPosition = player.position; // 临时存储新位置
+        // --- 修改输入处理和移动逻辑 ---
+        // 不再直接根据 WASD 计算连续的 newPosition
+        // 而是根据按键触发单元格间的跳跃式移动
 
-        if (keys[GLFW_KEY_W])
-            newPosition.y -= velocity;
-        if (keys[GLFW_KEY_S])
-            newPosition.y += velocity;
-        if (keys[GLFW_KEY_A])
-            newPosition.x -= velocity;
-        if (keys[GLFW_KEY_D])
-            newPosition.x += velocity;
-
-        // 检查碰撞并更新位置
-        if (!player.CheckWallCollision(mazeGen, newPosition.x, newPosition.y, CELL_SIZE)) {
-            player.position = newPosition;
+        // --- 触发移动 ---
+        if (keys[GLFW_KEY_W]) {
+            player.TryMove(0, -1, mazeGen, CELL_SIZE); // 向上
+        }
+        if (keys[GLFW_KEY_S]) {
+            player.TryMove(0, 1, mazeGen, CELL_SIZE); // 向下
+        }
+        if (keys[GLFW_KEY_A]) {
+            player.TryMove(-1, 0, mazeGen, CELL_SIZE); // 向左
+        }
+        if (keys[GLFW_KEY_D]) {
+            player.TryMove(1, 0, mazeGen, CELL_SIZE); // 向右
         }
 
-        // 技能处理 (在主循环中检查按键状态)
+
+        // --- 执行移动动画 (必须在 Update 之前或之后调用，取决于设计) ---
+        // 在这里调用 PerformMovement 是合理的
+        player.PerformMovement(deltaTime, CELL_SIZE); // 传入正确的 CELL_SIZE
+
+
+        // --- 技能处理 ---
         if (keys[GLFW_KEY_E] && player.cooldownE <= 0) {
-            player.isAccelerating = true;
-            player.accelTimer = 3.0f;
+            // player.isAccelerating = true; // 这个标志现在由 Update 内部管理
+            player.accelTimer = 3.0f; // 启动加速计时器
             player.cooldownE = 15.0f;
             audioSystem.PlaySound("skill_e");
         }
@@ -163,28 +163,35 @@ int main()
             for (auto& m : monsters) m.frozen = true;
             player.cooldownQ = 20.0f;
             audioSystem.PlaySound("skill_q");
-            // 解冻逻辑可以放在 Monster::Update 里
         }
 
         // --- Update Logic ---
-        player.Update(deltaTime);
+        // player.Update(deltaTime); // 可以简化，因为大部分逻辑已移出或重构
+        // 保留 Update 以处理技能计时器等
+        if (player.accelTimer > 0) {
+            player.accelTimer -= deltaTime;
+            player.isAccelerating = true;
+        }
+        else {
+            player.isAccelerating = false;
+        }
+        if (player.cooldownE > 0) player.cooldownE -= deltaTime;
+        if (player.cooldownQ > 0) player.cooldownQ -= deltaTime;
 
-        // Update monsters (pass mazeGen reference now)
+
+        // --- Monster 和 Collectible 逻辑 (基本保持不变) ---
         alertTriggered = false;
         for (auto& monster : monsters) {
-            // Pass mazeGen, cellSize to enable pathfinding/collision inside Update
             monster.Update(deltaTime, player, mazeGen, CELL_SIZE);
             if (!alertTriggered && monster.visible && glm::distance(monster.position, player.position) < monster.detectionRange) {
                 alertTriggered = true;
-                audioSystem.PlaySound("alert"); // Play once
+                audioSystem.PlaySound("alert");
             }
-            // Simple unfreeze logic (placed in main loop rather than Monster::Update for synchronization)
-            if (monster.frozen && player.cooldownQ <= (20.0f - 2.0f + 0.1f)) { // Assume freeze for 2 seconds
+            if (monster.frozen && player.cooldownQ <= (20.0f - 2.0f + 0.1f)) {
                 monster.frozen = false;
             }
         }
 
-        // 碰撞检测 (收集品)
         for (auto& item : collectibles) {
             if (!item.collected) {
                 float dx = player.position.x - item.position.x;
@@ -201,17 +208,16 @@ int main()
         // --- 胜利条件检查 ---
         if (score <= 0 && !gameWon) {
             gameWon = true;
-            victoryTimer = 0.0f; // 开始计时
-            std::cout << "Victory! Game will restart shortly...\n"; // 控制台输出
+            victoryTimer = 0.0f;
+            std::cout << "Victory! Game will restart shortly...\n";
         }
 
         // --- 胜利状态处理 ---
         if (gameWon) {
             victoryTimer += deltaTime;
             if (victoryTimer >= victoryDisplayTime) {
-                // 重启游戏
                 ResetGame(mazeGen, player, monsters, collectibles, score, MAZE_WIDTH, MAZE_HEIGHT, CELL_SIZE);
-                gameWon = false; // 重置胜利标志
+                gameWon = false;
                 victoryTimer = 0.0f;
             }
         }
@@ -220,14 +226,14 @@ int main()
         renderer.BeginFrame();
 
         if (alertTriggered) {
-            renderer.DrawAlertFlash(); // 仅此帧绘制红色背景
-            renderer.BeginFrame(); // 重新开始正常的绘制
+            renderer.DrawAlertFlash();
+            renderer.BeginFrame();
         }
 
         renderer.DrawMaze(mazeGen, CELL_SIZE);
         renderer.DrawCollectibles(collectibles);
         renderer.DrawMonsters(monsters);
-        renderer.DrawPlayer(player);
+        renderer.DrawPlayer(player); // Player 的 position 会被正确更新用于渲染
 
         renderer.EndFrame(window);
 
