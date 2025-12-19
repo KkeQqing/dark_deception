@@ -40,6 +40,9 @@ private:
         bool operator>(const Node& other) const { return f > other.f; } // For min-heap based on 'f'
     };
 
+    glm::vec2 patrolTarget; // The current random point to patrol towards
+    float patrolTargetTimer = 0.0f; // Timer to decide when to pick a new patrol target
+
     // --- New: Pathfinding Function ---
     // Finds a path from current monster position to target using A*
     // Stores the path in the 'path' member vector.

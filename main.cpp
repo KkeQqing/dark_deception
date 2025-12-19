@@ -68,7 +68,7 @@ int main()
 
     const int SCR_WIDTH = 800;
     const int SCR_HEIGHT = 600;
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "ºÚ°µÆÛÆ­2D", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "dark deception", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;

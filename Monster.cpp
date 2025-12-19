@@ -5,6 +5,62 @@
 #include <climits> // For INT_MAX
 #include <cstring> // For memset (optional, but useful for resetting arrays)
 
+// Monster.cpp (靠近文件顶部，在 #include 之后)
+#include <glm/gtc/constants.hpp> // 可能需要这个头文件用于 PI
+
+// --- New: Raycasting for Line of Sight ---
+// Checks if there's a direct line of sight between monster and player, considering walls.
+bool HasLineOfSight(const Monster& monster, const Player& player, const MazeGenerator& mazeGen, float cellSize) {
+    glm::vec2 start = monster.position;
+    glm::vec2 end = player.position;
+    glm::vec2 direction = end - start;
+    float distance = glm::length(direction);
+
+    if (distance < 0.001f) return true; // Avoid division by zero if positions are very close
+
+    direction = glm::normalize(direction);
+
+    // Simple ray marching: move along the ray in small steps
+    const float stepSize = 2.0f; // Adjust step size for accuracy/performance trade-off
+    float t = 0.0f; // Parameter along the ray (0=start, 1=end)
+
+    while (t * distance < distance) { // March until we reach the player or hit a wall
+        glm::vec2 testPoint = start + direction * (t * distance);
+
+        // Check if this point hits a wall
+        int gridX = static_cast<int>(floor(testPoint.x / cellSize));
+        int gridY = static_cast<int>(floor(testPoint.y / cellSize));
+
+        // Boundary check
+        if (gridX < 0 || gridX >= mazeGen.width || gridY < 0 || gridY >= mazeGen.height) {
+            // Treat out-of-bounds as walls
+            return false;
+        }
+
+        const Cell& cell = mazeGen.maze[gridY][gridX];
+
+        // Check if the test point is inside a wall area of the cell
+        float cellLeft = gridX * cellSize;
+        float cellRight = (gridX + 1) * cellSize;
+        float cellTop = gridY * cellSize;
+        float cellBottom = (gridY + 1) * cellSize;
+
+        // Check against each wall of the cell
+        if (cell.walls[0] && testPoint.y <= cellTop + 1.0f) return false; // Top wall
+        if (cell.walls[1] && testPoint.x >= cellRight - 1.0f) return false; // Right wall
+        if (cell.walls[2] && testPoint.y >= cellBottom - 1.0f) return false; // Bottom wall
+        if (cell.walls[3] && testPoint.x <= cellLeft + 1.0f) return false; // Left wall
+
+        t += stepSize / distance; // Increment parameter
+
+        // Prevent infinite loop in case of precision issues
+        if (t > 1.1f) break;
+    }
+
+    // If we got here, we didn't hit a wall
+    return true;
+}
+
 // Constructor implementation
 Monster::Monster(float x, float y)
     : position(x, y),
@@ -25,7 +81,7 @@ void Monster::Update(float deltaTime, const Player& player, const MazeGenerator&
     float dy_to_player = player.position.y - position.y;
     float distanceToPlayer = sqrt(dx_to_player * dx_to_player + dy_to_player * dy_to_player);
 
-    if (distanceToPlayer < detectionRange) {
+    if (distanceToPlayer < detectionRange && HasLineOfSight(*this, player, mazeGen, cellSize)) {
         // Enter chase mode
         currentSpeed = chaseSpeed;
         visible = true;
@@ -109,28 +165,24 @@ void Monster::Update(float deltaTime, const Player& player, const MazeGenerator&
         currentSpeed = baseSpeed;
         visible = (distanceToPlayer < 150.0f); // Visible when closer
 
-        // --- Enhanced Patrol Logic ---
-        // Move towards home position if too far away during patrol
-        float dx_to_home = homePosition.x - position.x;
-        float dy_to_home = homePosition.y - position.y;
-        float dist_to_home = sqrt(dx_to_home * dx_to_home + dy_to_home * dy_to_home);
+        // --- Random Patrol Logic ---
+        // Simple state machine: PATROL_TO_TARGET -> WAIT_AT_TARGET -> Choose new target
 
-        // Simple patrol: Move towards home if far, otherwise stay near it
-        // In a more complex system, you'd have multiple patrol points or random walk within radius
-        glm::vec2 targetForPatrol = homePosition; // Default target is home
-        if (dist_to_home > patrolRadius) {
-            // Move back towards home
-            targetForPatrol = homePosition;
-        }
-        else {
-            // Could add more complex patrol logic here if needed
-            // For now, just head towards home if outside radius
-            targetForPatrol = homePosition;
+        // If no patrol target or reached the target, choose a new random one nearby
+        if (patrolTargetTimer <= 0.0f || glm::distance(position, patrolTarget) < 5.0f) {
+            // Choose a new random point within patrolRadius of homePosition
+            float angle = static_cast<float>(rand()) / RAND_MAX * 2.0f * 3.14159265f;
+            float radius_offset = static_cast<float>(rand()) / RAND_MAX * patrolRadius;
+            float targetX = homePosition.x + cos(angle) * radius_offset;
+            float targetY = homePosition.y + sin(angle) * radius_offset;
+            patrolTarget = glm::vec2(targetX, targetY);
+            // Set timer for how long to move towards this target (e.g., 2-5 seconds)
+            patrolTargetTimer = 2.0f + static_cast<float>(rand()) / RAND_MAX * 3.0f;
         }
 
-        // Move towards patrol target
-        float dx_patrol = targetForPatrol.x - position.x;
-        float dy_patrol = targetForPatrol.y - position.y;
+        // Move towards the current patrol target
+        float dx_patrol = patrolTarget.x - position.x;
+        float dy_patrol = patrolTarget.y - position.y;
         float dist_patrol_full = sqrt(dx_patrol * dx_patrol + dy_patrol * dy_patrol);
         if (dist_patrol_full > 0) {
             dx_patrol /= dist_patrol_full;
@@ -145,7 +197,12 @@ void Monster::Update(float deltaTime, const Player& player, const MazeGenerator&
                 position.x = newX;
                 position.y = newY;
             }
+            // Optional: If blocked, maybe choose a new target sooner? Or just wait?
+            // For simplicity, let the timer handle re-targeting.
         }
+
+        // Decrement the timer
+        patrolTargetTimer -= deltaTime;
     }
 }
 
