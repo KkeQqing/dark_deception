@@ -137,19 +137,12 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AudioSystem.cpp" />
-    <ClCompile Include="Collectible.cpp" />
-    <ClCompile Include="Game.cpp" />
     <ClCompile Include="glad\src\glad.c" />
-    <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MazeGenerator.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_miniaudio_test.cpp" />
-    <ClCompile Include="UIManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="asset\test.png">
@@ -173,15 +166,12 @@
     <ClInclude Include="externals\include\miniaudio.h" />
     <ClInclude Include="externals\include\stb_image.h" />
     <ClInclude Include="externals\include\stb_truetype.h" />
-    <ClInclude Include="Game.h" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="MazeGenerator.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="UIManager.h" />
-    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
