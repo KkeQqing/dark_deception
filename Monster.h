@@ -9,7 +9,7 @@ class Player; // 前向声明
 class Monster {
 public:
 	glm::vec2 position; // 怪物位置
-	float radius = 6.0f; // 怪物半径
+	float radius = 12.0f; // 怪物半径
 	float baseSpeed = 80.0f; // 基础速度
 	float currentSpeed = 80.0f; // 当前速度
 	glm::vec2 targetPosition; // 目标位置 (用于巡逻)

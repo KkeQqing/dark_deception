@@ -7,7 +7,7 @@
 class Player {
 public:
 	glm::vec2 position; // 玩家位置
-	float radius = 8.0f; // 玩家半径
+	float radius = 10.0f; // 玩家半径
 	float speed = 150.0f; // 玩家速度
 	bool isAccelerating = false; // 是否在加速
 	float accelTimer = 0.0f; // 加速计时器
