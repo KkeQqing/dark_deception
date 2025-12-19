@@ -1,31 +1,60 @@
-#define GLM_ENABLE_EXPERIMENTAL
 #pragma once
 #include <glm/glm.hpp>
-#include <random> // 添加随机数支持
+#include <vector> // For path storage and A*
+#include <queue>  // For priority_queue in A*
+#include <functional> // For std::function
+#include "MazeGenerator.h" // Need access to maze structure
 
-class Player; // 前向声明
+class Player; // Forward declaration
 
-// 怪物类
+// Monster class
 class Monster {
 public:
-	glm::vec2 position; // 怪物位置
-	float radius = 12.0f; // 怪物半径
-	float baseSpeed = 80.0f; // 基础速度
-	float currentSpeed = 80.0f; // 当前速度
-	glm::vec2 targetPosition; // 目标位置 (用于巡逻)
-	bool frozen = false; // 是否被冻结
-	bool visible = true; // 是否可见
-	float detectionRange = 200.0f; // 侦测范围
-	float chaseSpeed = 150.0f; // 追逐速度
+    glm::vec2 position; // Monster position
+    float radius = 6.0f; // Monster radius
+    float baseSpeed = 80.0f; // Base speed
+    float currentSpeed = 80.0f; // Current speed
+    std::vector<glm::vec2> path; // Path to follow (for pathfinding)
+    size_t currentPathIndex = 0; // Index of the next node in the path
+    bool frozen = false; // Is frozen
+    bool visible = true; // Is visible
+    float detectionRange = 200.0f; // Detection range
+    float chaseSpeed = 150.0f; // Chase speed
 
-	// --- 新增: 复杂巡逻 ---
-	glm::vec2 homePosition; // 巡逻的中心点
-	float patrolRadius = 100.0f; // 巡逻半径
-	std::mt19937 rng; // 每个怪物有自己的随机数生成器
-	std::uniform_real_distribution<float> dist; // 分布 [-1, 1]
+    // --- Enhanced Patrol ---
+    glm::vec2 homePosition; // Patrol center point
+    float patrolRadius = 100.0f; // Patrol radius
 
-	Monster(float x, float y); // 构造函数声明
+    Monster(float x, float y); // Constructor declaration
 
-	// 更新怪物状态
-	void Update(float deltaTime, const Player& player);
+    // Update monster state
+    // Pass MazeGenerator reference for pathfinding/collision
+    void Update(float deltaTime, const Player& player, const MazeGenerator& mazeGen, float cellSize);
+
+private:
+    // --- New: Pathfinding Structures ---
+    struct Node {
+        int x, y;
+        float g, h, f; // g: cost from start, h: heuristic to goal, f: total cost (g+h)
+        Node* parent;
+        bool operator>(const Node& other) const { return f > other.f; } // For min-heap based on 'f'
+    };
+
+    // --- New: Pathfinding Function ---
+    // Finds a path from current monster position to target using A*
+    // Stores the path in the 'path' member vector.
+    // Returns true if a path was found, false otherwise.
+    bool FindPath(const MazeGenerator& mazeGen, float cellSize, const glm::vec2& targetPos);
+
+    // --- New: Helper for Pathfinding/Collision ---
+    // Checks if moving from (fromX, fromY) to (toX, toY) crosses a wall in the maze.
+    bool IsPathBlockedByWall(const MazeGenerator& mazeGen, float fromX, float fromY, float toX, float toY, float cellSize) const;
+
+    // --- New: Simple Wall Collision for Monster Movement ---
+    // Checks if the monster's circle at (newX, newY) collides with walls in its current cell.
+    bool CheckWallCollision(const MazeGenerator& mazeGen, float newX, float newY, float cellSize) const;
+
+    // --- New: Helper for Pathfinding ---
+    // Calculates Manhattan distance heuristic between two points (grid coordinates).
+    float Heuristic(int x1, int y1, int x2, int y2) const;
 };

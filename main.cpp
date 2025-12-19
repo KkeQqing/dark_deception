@@ -166,19 +166,20 @@ int main()
             // 解冻逻辑可以放在 Monster::Update 里
         }
 
-        // --- 更新逻辑 ---
+        // --- Update Logic ---
         player.Update(deltaTime);
 
-        // 更新怪物
+        // Update monsters (pass mazeGen reference now)
         alertTriggered = false;
         for (auto& monster : monsters) {
-            monster.Update(deltaTime, player); // 现在 Monster::Update 接收 Player 引用
+            // Pass mazeGen, cellSize to enable pathfinding/collision inside Update
+            monster.Update(deltaTime, player, mazeGen, CELL_SIZE);
             if (!alertTriggered && monster.visible && glm::distance(monster.position, player.position) < monster.detectionRange) {
                 alertTriggered = true;
-                audioSystem.PlaySound("alert"); // 播放一次即可
+                audioSystem.PlaySound("alert"); // Play once
             }
-            // 简单解冻逻辑 (放在主循环而不是 Monster::Update 中是为了同步)
-            if (monster.frozen && player.cooldownQ <= (20.0f - 2.0f + 0.1f)) { // 假设冻结2秒
+            // Simple unfreeze logic (placed in main loop rather than Monster::Update for synchronization)
+            if (monster.frozen && player.cooldownQ <= (20.0f - 2.0f + 0.1f)) { // Assume freeze for 2 seconds
                 monster.frozen = false;
             }
         }
