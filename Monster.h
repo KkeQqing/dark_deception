@@ -11,7 +11,7 @@ class Player; // Forward declaration
 class Monster {
 public:
     glm::vec2 position; // Monster position
-    float radius = 6.0f; // Monster radius
+    float radius = 12.0f; // Monster radius
     float baseSpeed = 80.0f; // Base speed
     float currentSpeed = 80.0f; // Current speed
     std::vector<glm::vec2> path; // Path to follow (for pathfinding)
