@@ -2,12 +2,15 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <fstream>
+
 // ===== stb_image: 图像加载 =====
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 // ===== miniaudio: 音频播放 =====
 #define MINIAUDIO_IMPLEMENTATION
+#define MA_ENABLE_MP3  
 #include "miniaudio.h"
 
 // ===== 着色器源码 =====
@@ -86,7 +89,7 @@ int main() {
     // ========================
     // 图像加载与纹理创建
     // ========================
-    const char* imagePath = "D:/C++/dark_deception/asset/test.png";
+    const char* imagePath = "D:/C++/dark_deception/asset/img/test.png";
     stbi_set_flip_vertically_on_load(true);
 
     int width, height, channels;
@@ -158,7 +161,14 @@ int main() {
     ma_engine engine;
     ma_sound sound;
     bool audioLoaded = false;
-    const char* audioPath = "D:/C++/dark_deception/asset/test.wav";
+    const char* audioPath = "D:\\C++\\dark_deception\\asset\\audio\\test.flac";
+
+    std::ifstream testFile(audioPath, std::ios::binary);
+    if (!testFile) {
+        std::cerr << "ERROR: Audio file does not exist or cannot be opened!" << std::endl;
+        return -1;
+    }
+    testFile.close();
 
     // 初始化并启动音频引擎
     if (ma_engine_init(NULL, &engine) == MA_SUCCESS) {
@@ -218,7 +228,7 @@ int main() {
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &EBO);       
     glDeleteProgram(shaderProgram);
     glDeleteTextures(1, &texture);
 

@@ -125,6 +125,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="asset\audio\test.flac" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
@@ -134,12 +135,16 @@
     <ClCompile Include="stb_miniaudio_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="asset\img\test.png" />
     <Image Include="asset\test.png">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="asset\audio\test.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

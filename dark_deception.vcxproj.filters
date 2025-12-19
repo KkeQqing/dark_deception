@@ -18,6 +18,7 @@
     <None Include="packages.config" />
     <None Include="README.md" />
     <None Include=".gitignore" />
+    <None Include="asset\audio\test.flac" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,5 +35,13 @@
     <Image Include="asset\test.png">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="asset\img\test.png">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="asset\audio\test.wav">
+      <Filter>资源文件</Filter>
+    </Media>
   </ItemGroup>
 </Project>
