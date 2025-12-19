@@ -18,16 +18,48 @@
     <None Include="packages.config" />
     <None Include="README.md" />
     <None Include=".gitignore" />
-    <None Include="asset\audio\test.flac" />
+    <None Include="assets\sounds\test.flac" />
+    <None Include="assets\shaders\fragment_shader.glsl" />
+    <None Include="assets\shaders\vertex_shader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\practice_programmable_pipeline\glad\src\glad.c">
+    <ClCompile Include="stb_miniaudio_test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stb_miniaudio_test.cpp">
+    <ClCompile Include="Game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MazeGenerator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Collectible.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioSystem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="glad\src\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,13 +67,67 @@
     <Image Include="asset\test.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="asset\img\test.png">
-      <Filter>资源文件</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="asset\audio\test.wav">
       <Filter>资源文件</Filter>
     </Media>
+    <Media Include="assets\sounds\alert.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="assets\sounds\bg_music.mp3" />
+    <Media Include="assets\sounds\collect.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="assets\sounds\skill_e.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+    <Media Include="assets\sounds\skill_q.wav">
+      <Filter>资源文件</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MazeGenerator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Collectible.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioSystem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\include\miniaudio.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\include\stb_truetype.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="externals\include\stb_image.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
