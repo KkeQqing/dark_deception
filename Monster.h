@@ -18,7 +18,7 @@ class Monster {
 public:
     glm::vec2 position; // 怪物位置
     float radius = 10.0f; // 怪物半径
-    float baseSpeed = 80.0f; // 基础速度
+    float baseSpeed = 50.0f; // 基础速度
     float currentSpeed = 80.0f; // 当前速度
     std::vector<glm::vec2> path; // 要跟随的路径 (用于寻路)
     size_t currentPathIndex = 0; // 路径中下一个节点的索引
