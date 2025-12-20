@@ -107,23 +107,23 @@ void Monster::Update(float deltaTime, const Player& player, const MazeGenerator&
 
     // --- ÐÞ¸Ä: Determine state with Line-of-Sight check ---
     // Check if player is within detection range AND has unobstructed line of sight
-    //bool playerInRange = distanceToPlayer < detectionRange;
-    //bool playerVisible = false;
-    //if (playerInRange) {
-    //    playerVisible = HasLineOfSight(mazeGen, position.x, position.y, player.position.x, player.position.y, cellSize);
-    //}
+    bool playerInRange = distanceToPlayer < detectionRange;
+    bool playerVisible = false;
+    if (playerInRange) {
+        playerVisible = HasLineOfSight(mazeGen, position.x, position.y, player.position.x, player.position.y, cellSize);
+    }
 
-    //if (playerInRange && playerVisible) {
-    //    state = MonsterState::CHASING;
-    //    currentSpeed = chaseSpeed;
-    //    visible = true;
-    //}
-    //else {
-    //    state = MonsterState::PATROLLING;
-    //    currentSpeed = baseSpeed;
-    //    // Optional: Make monster less visible when far away even if technically in range but not seen
-    //    visible = (distanceToPlayer < 150.0f);
-    //}
+    if (playerInRange && playerVisible) {
+        state = MonsterState::CHASING;
+        currentSpeed = chaseSpeed;
+        visible = true;
+    }
+    else {
+        state = MonsterState::PATROLLING;
+        currentSpeed = baseSpeed;
+        // Optional: Make monster less visible when far away even if technically in range but not seen
+        visible = (distanceToPlayer < 150.0f);
+    }
 
 
     // --- Movement Logic ---
