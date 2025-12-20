@@ -63,8 +63,8 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    const int SCR_WIDTH = 800;
-    const int SCR_HEIGHT = 800;
+    const int SCR_WIDTH = 751;
+    const int SCR_HEIGHT = 751;
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "dark deception", NULL, NULL);
     if (window == NULL)
     {
