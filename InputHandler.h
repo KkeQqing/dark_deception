@@ -21,6 +21,5 @@ public:
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
             player.position.x += velocity;
 
-        // Skills would be handled here or in the main loop based on key events
     }
 };
