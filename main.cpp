@@ -205,6 +205,30 @@ int main()
             }
         }
 
+        // --- 玩家与怪物碰撞检测 ---
+        bool playerHit = false;
+        for (const auto& monster : monsters) {
+            if (!monster.frozen) { // 冻结状态下不造成伤害
+                float dx = player.position.x - monster.position.x;
+                float dy = player.position.y - monster.position.y;
+                float dist = sqrt(dx * dx + dy * dy);
+                if (dist < (player.radius + monster.radius)) {
+                    playerHit = true;
+                    break;
+                }
+            }
+        }
+
+        if (playerHit) {
+            // 传送回出生点（0,0）单元格中心
+            player.cellX = 0;
+            player.cellY = 0;
+            player.position = glm::vec2(CELL_SIZE / 2.0f, CELL_SIZE / 2.0f);
+            player.targetPosition = player.position;
+            player.isMoving = false;
+            std::cout << "Player hit! Teleported to start.\n";
+        }
+
         // --- 胜利条件检查 ---
         if (score <= 0 && !gameWon) {
             gameWon = true;
