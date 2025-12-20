@@ -41,6 +41,8 @@ void ResetGame(MazeGenerator& mazeGen, Player& player, std::vector<Monster>& mon
     monsters.emplace_back(5 * CELL_SIZE + CELL_SIZE / 2, 5 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(10 * CELL_SIZE + CELL_SIZE / 2, 10 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(15 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
+	monsters.emplace_back(12 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
+	monsters.emplace_back(8 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
 
     collectibles.clear();
     for (int i = 0; i < 5; ++i) {
@@ -62,7 +64,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     const int SCR_WIDTH = 800;
-    const int SCR_HEIGHT = 600;
+    const int SCR_HEIGHT = 800;
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "dark deception", NULL, NULL);
     if (window == NULL)
     {
@@ -88,8 +90,8 @@ int main()
     audioSystem.LoadSound("alert", "D:/C++/dark_deception/assets/sounds/alert.wav");
 
     // 初始化游戏对象
-    const int MAZE_WIDTH = 20;
-    const int MAZE_HEIGHT = 20;
+    const int MAZE_WIDTH = 30;
+    const int MAZE_HEIGHT = 30;
     const float CELL_SIZE = 25.0f;
     MazeGenerator mazeGen(MAZE_WIDTH, MAZE_HEIGHT);
     mazeGen.Generate();
@@ -102,6 +104,8 @@ int main()
     monsters.emplace_back(5 * CELL_SIZE + CELL_SIZE / 2, 5 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(10 * CELL_SIZE + CELL_SIZE / 2, 10 * CELL_SIZE + CELL_SIZE / 2);
     monsters.emplace_back(15 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
+    monsters.emplace_back(12 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
+    monsters.emplace_back(8 * CELL_SIZE + CELL_SIZE / 2, 15 * CELL_SIZE + CELL_SIZE / 2);
 
     // 放置收集品
     std::vector<Collectible> collectibles;
