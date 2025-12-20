@@ -90,8 +90,8 @@ int main()
     audioSystem.LoadSound("alert", "assets/sounds/alert.wav");
 
     // 初始化游戏对象
-    const int MAZE_WIDTH = 20;
-    const int MAZE_HEIGHT = 20;
+    const int MAZE_WIDTH = 30;
+    const int MAZE_HEIGHT = 30;
     const float CELL_SIZE = 25.0f;
     MazeGenerator mazeGen(MAZE_WIDTH, MAZE_HEIGHT);
     mazeGen.Generate();

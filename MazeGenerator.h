@@ -15,8 +15,8 @@ struct Cell {
 class MazeGenerator {
 public:
     int width, height;
-    std::vector<std::vector<Cell>> maze;
-    std::mt19937 rng;
+	std::vector<std::vector<Cell>> maze; // 迷宫网格
+	std::mt19937 rng; // 随机数生成器
 
     MazeGenerator(int w, int h) : width(w), height(h), rng(std::random_device{}()) {
         maze.resize(height, std::vector<Cell>(width));
@@ -36,11 +36,11 @@ public:
 private:
 	// 递归回溯算法生成迷宫
     void generateRecursiveBacktracker(int x, int y) {
-        static std::vector<std::pair<int, int>> directions = { {0,-1}, {1,0}, {0,1}, {-1,0} };
+		static std::vector<std::pair<int, int>> directions = { {0,-1}, {1,0}, {0,1}, {-1,0} }; // 方向定义：上右下左
         maze[y][x].visited = true;
-        std::shuffle(directions.begin(), directions.end(), rng);
+		std::shuffle(directions.begin(), directions.end(), rng);// 随机化方向顺序
 
-        for (const auto& dir : directions) {
+		for (const auto& dir : directions) { // 遍历每个方向
             int nx = x + dir.first;
             int ny = y + dir.second;
 
