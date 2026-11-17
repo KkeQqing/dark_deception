@@ -48,3 +48,20 @@ compile_commands.json
 .env
 .DS_Store
 Thumbs.db
+
+# auto-added ignore rules
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+desktop.ini
+*.tmp
+build/
+out/
+*.o
+*.obj
+*.exe
+*.ilk
+*.pdb
+cmake-build-*/
