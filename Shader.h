@@ -2,7 +2,7 @@
 #define SHADER_H
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glad/glad.h> // 必须在 glfw3.h 之前
+#include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 #include <string>

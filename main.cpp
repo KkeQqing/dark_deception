@@ -1,5 +1,5 @@
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glad/glad.h> // 必须在 glfw3.h 之前
+#include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <iostream>
@@ -9,29 +9,25 @@
 
 #include "Shader.h"
 #include "MazeGenerator.h"
-#include "Player.h" // 包含 Player 头文件
-#include "Monster.h" // 包含 Monster 头文件
+#include "Player.h"
+#include "Monster.h" 
 #include "Collectible.h"
 #include "Renderer.h"
 #include "AudioSystem.h"
 
-// 全局变量用于回调
-bool keys[1024]; // 按键状态
-bool alertTriggered = false; // 警报状态
+bool keys[1024];
+bool alertTriggered = false; 
 AudioSystem audioSystem; // 全局音频系统实例
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height); // 窗口大小回调
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode); // 键盘回调
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods); // 鼠标按钮回调
 
-// --- 新增: 重置游戏函数 ---
 void ResetGame(MazeGenerator& mazeGen, Player& player, std::vector<Monster>& monsters, std::vector<Collectible>& collectibles, int& score, const int MAZE_WIDTH, const int MAZE_HEIGHT, const float CELL_SIZE) {
     mazeGen.Generate();
 
-    // --- 修改 Player 初始化 ---
     player = Player(0, 0, CELL_SIZE); // 从 (0,0) 单元格开始
 
-    player.speed = 150.0f;
     player.isAccelerating = false;
     player.accelTimer = 0.0f;
     player.cooldownE = 0.0f;
@@ -90,13 +86,13 @@ int main()
     audioSystem.LoadSound("alert", "assets/sounds/alert.wav");
 
     // 初始化游戏对象
-    const int MAZE_WIDTH = 30;
-    const int MAZE_HEIGHT = 30;
+    const int MAZE_WIDTH = 20;
+    const int MAZE_HEIGHT = 20;
     const float CELL_SIZE = 25.0f;
     MazeGenerator mazeGen(MAZE_WIDTH, MAZE_HEIGHT);
     mazeGen.Generate();
 
-    // 简单放置玩家在起点
+    // 放置玩家在起点
     Player player(0, 0, CELL_SIZE);
 
     // 放置怪物
@@ -120,7 +116,7 @@ int main()
     float lastFrame = 0.0f;
     int score = collectibles.size();
 
-    // --- 新增: 胜利状态管理 ---
+    // --- 胜利状态管理 ---
     bool gameWon = false;
     float victoryTimer = 0.0f;
     const float victoryDisplayTime = 3.0f; // 胜利消息显示时间
@@ -131,10 +127,6 @@ int main()
         float currentFrame = glfwGetTime();
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
-        // --- 修改输入处理和移动逻辑 ---
-        // 不再直接根据 WASD 计算连续的 newPosition
-        // 而是根据按键触发单元格间的跳跃式移动
 
         // --- 触发移动 ---
         if (keys[GLFW_KEY_W]) {
@@ -150,15 +142,11 @@ int main()
             player.TryMove(1, 0, mazeGen, CELL_SIZE); // 向右
         }
 
-
-        // --- 执行移动动画 (必须在 Update 之前或之后调用，取决于设计) ---
-        // 在这里调用 PerformMovement 是合理的
-        player.PerformMovement(deltaTime, CELL_SIZE); // 传入正确的 CELL_SIZE
+        player.PerformMovement(deltaTime, CELL_SIZE); 
 
 
         // --- 技能处理 ---
         if (keys[GLFW_KEY_E] && player.cooldownE <= 0) {
-            // player.isAccelerating = true; // 这个标志现在由 Update 内部管理
             player.accelTimer = 3.0f; // 启动加速计时器
             player.cooldownE = 15.0f;
             audioSystem.PlaySound("skill_e");
@@ -169,9 +157,6 @@ int main()
             audioSystem.PlaySound("skill_q");
         }
 
-        // --- Update Logic ---
-        // player.Update(deltaTime); // 可以简化，因为大部分逻辑已移出或重构
-        // 保留 Update 以处理技能计时器等
         if (player.accelTimer > 0) {
             player.accelTimer -= deltaTime;
             player.isAccelerating = true;
@@ -183,7 +168,7 @@ int main()
         if (player.cooldownQ > 0) player.cooldownQ -= deltaTime;
 
 
-        // --- Monster 和 Collectible 逻辑 (基本保持不变) ---
+        // --- Monster 和 Collectible 逻辑 ---
         alertTriggered = false;
         for (auto& monster : monsters) {
             monster.Update(deltaTime, player, mazeGen, CELL_SIZE);
@@ -212,7 +197,7 @@ int main()
         // --- 玩家与怪物碰撞检测 ---
         bool playerHit = false;
         for (const auto& monster : monsters) {
-            if (!monster.frozen) { // 冻结状态下不造成伤害
+            if (!monster.frozen) { 
                 float dx = player.position.x - monster.position.x;
                 float dy = player.position.y - monster.position.y;
                 float dist = sqrt(dx * dx + dy * dy);
@@ -297,7 +282,5 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
-        // std::cout << "Mouse clicked at: " << xpos << ", " << ypos << std::endl;
-        // 在这里处理 UI 点击，例如重启按钮
     }
 }

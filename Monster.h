@@ -1,76 +1,69 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <vector> 
-#include <queue>  
-#include <functional> 
-#include "MazeGenerator.h" 
+#include <vector>
+#include <random>
+#include "MazeGenerator.h"
 
 class Player; 
 
-// 怪物状态枚举
+// 怪物状态枚举：用于表示怪物当前的行为模式
 enum class MonsterState {
-    PATROLLING, // 巡逻
-    CHASING     // 追逐
+    PATROLLING, // 巡逻状态
+    CHASING     // 追逐状态
 };
 
-// Monster 类
 class Monster {
 public:
-    glm::vec2 position; // 怪物位置
-    float radius = 10.0f; // 怪物半径
-    float baseSpeed = 50.0f; // 基础速度
-    float currentSpeed = 80.0f; // 当前速度
-    std::vector<glm::vec2> path; // 要跟随的路径 (用于寻路)
-    size_t currentPathIndex = 0; // 路径中下一个节点的索引
-    bool frozen = false; // 是否被冻结
-    bool visible = true; // 是否可见
-    float detectionRange = 200.0f; // 探测范围
-    float chaseSpeed = 150.0f; // 追逐速度
-    float stuckTimer = 0.0f; // 用于记录怪物是否卡住的时间
-    MonsterState state = MonsterState::PATROLLING; // 当前状态
+    glm::vec2 position;                 // 怪物当前位置
+    float radius = 10.0f;               // 碰撞半径
+    float baseSpeed = 50.0f;            // 基础移动速度
+    float currentSpeed = 80.0f;         
+    bool frozen = false;                // 是否被冻结
+    bool visible = true;                // 是否可见
+    float detectionRange = 200.0f;      // 发现玩家的最大距离
+    float chaseSpeed = 150.0f;          // 追逐玩家时的速度
+    float stuckTimer = 0.0f;            // 检测是否长时间无法移动
+    MonsterState state = MonsterState::PATROLLING; // 当前行为状态，默认为巡逻
 
-    glm::vec2 homePosition; // 巡逻中心点
-    float patrolRadius = 500.0f; // 巡逻半径
+    glm::vec2 homePosition;             // 出生点/巡逻中心点
+    float patrolRadius = 500.0f;        // 巡逻范围半径（怪物不会离开该区域太远）
 
-    // --- 方向控制 ---
-    enum Direction { NONE = -1, UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
-    Direction currentDirection = NONE; // 当前移动方向
-    float directionChangeTimer = 0.0f; // 方向改变定时器
-    const float minDirectionChangeInterval = 0.5f; // 最短方向改变间隔 (秒)
-    const float maxDirectionChangeInterval = 2.0f; // 最长方向改变间隔 (秒)
+    // 方向枚举
+    enum Direction {
+        NONE = -1,  // 无方向（初始或停止状态）
+        UP = 0,     // 上
+        RIGHT = 1,  // 右
+        DOWN = 2,   // 下
+        LEFT = 3    // 左
+    };
+    Direction currentDirection = NONE;  // 当前移动方向
+    float directionChangeTimer = 0.0f;  // 方向切换计时器
+    const float minDirectionChangeInterval = 0.5f;  // 最短方向切换间隔（秒）
+    const float maxDirectionChangeInterval = 2.0f;  // 最长方向切换间隔（秒）
 
     Monster(float x, float y);
 
-    // 更新怪物状态
+    // 每帧更新逻辑
+    // 参数：
+    //   deltaTime: 帧时间间隔（秒）
+    //   player: 玩家对象的常量引用（用于检测距离和视线）
+    //   mazeGen: 迷宫生成器（用于碰撞检测和路径判断）
+    //   cellSize: 迷宫每个格子的世界尺寸（像素或单位长度）
     void Update(float deltaTime, const Player& player, const MazeGenerator& mazeGen, float cellSize);
 
 private:
-    struct Node {
-        int x, y;
-        float g, h, f; // g: 从起点到当前点的实际成本, h: 到目标点的启发式估算成本 (Manhattan distance), f: 总成本 (g+h)
-        Node* parent;
-        // 为了基于 'f' 值构建最小堆 (min-heap)，重载大于运算符
-        bool operator>(const Node& other) const { return f > other.f; }
-    };
-
-    // 检查位于 (newX, newY) 的怪物圆形区域是否会与其所在单元格的墙壁发生碰撞。
+    // 检测在指定新位置 (newX, newY) 是否会与墙壁发生碰撞
+    // 返回 true 表示有碰撞（不能移动），false 表示可以移动
     bool CheckWallCollision(const MazeGenerator& mazeGen, float newX, float newY, float cellSize) const;
 
-    // 确定一个用于巡逻的有效随机新方向
+    // 在当前所在迷宫格子中，随机选择一个合法的移动方向（不撞墙）
+    // 如果没有合法方向，则返回 NONE
     Direction GetRandomValidDirection(const MazeGenerator& mazeGen, float cellSize) const;
 
-    // 检查从当前位置向给定方向移动一步是否可行
+    // 判断在给定方向上是否可以移动（即前方不是墙）
     bool CanMoveInDirection(const MazeGenerator& mazeGen, Direction dir, float cellSize) const;
 
-    // --- 视线检测 (Line-of-Sight, LOS) ---
-    // 检查从 (startX, startY) 到 (endX, endY) 的线段是否与迷宫中的任何墙壁相交。
+    // 检查从起点 (startX, startY) 到终点 (endX, endY) 是否存在无障碍视线（用于判断是否“看到”玩家）
+    // 使用射线检测或逐格检查方式实现
     bool HasLineOfSight(const MazeGenerator& mazeGen, float startX, float startY, float endX, float endY, float cellSize) const;
-
-    float Heuristic(int x1, int y1, int x2, int y2) const;
-
-    // 使用 A* 从怪物当前位置寻找一条通往目标点的路径。
-    bool FindPath(const MazeGenerator& mazeGen, float cellSize, const glm::vec2& targetPos);
-
-    // 检查从 (fromX, fromY) 移动到 (toX, toY) 是否会穿过迷宫中的一堵墙。
-    bool IsPathBlockedByWall(const MazeGenerator& mazeGen, float fromX, float fromY, float toX, float toY, float cellSize) const;
 };

@@ -11,7 +11,7 @@ public:
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, true);
 
-        float velocity = player.speed * deltaTime;
+        float velocity = player.moveSpeed * deltaTime;
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             player.position.y -= velocity;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
